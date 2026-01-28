@@ -1,0 +1,6 @@
+{
+  "name": "codex-xhigh",
+  "url": "ws://localhost:4321/ws",
+  "runId": "default",
+  "entry": "./bot.ts"
+}

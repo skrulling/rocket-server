@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rocket Spectator</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #0f141a;
+        --bg2: #1a2430;
+        --panel: rgba(20, 28, 38, 0.7);
+        --text: #e8f0f8;
+        --accent: #ffb703;
+        --grid: rgba(255, 255, 255, 0.08);
+        --wall: #2b3a4a;
+        --goal: #52b788;
+        --crash: #ef476f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Avenir Next", "Helvetica Neue", sans-serif;
+        color: var(--text);
+        background: radial-gradient(1200px 600px at 10% 10%, #233142, var(--bg))
+          fixed;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+      }
+
+      .frame {
+        width: min(980px, 94vw);
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr;
+        animation: fadeIn 0.6s ease-out both;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      .meta {
+        font-size: 0.9rem;
+        color: rgba(232, 240, 248, 0.7);
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .controls input {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 8px 12px;
+        min-width: 140px;
+      }
+
+      .controls select {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 8px 12px;
+      }
+
+      .btn {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 16px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #121a22, #0d1218);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .legend {
+        display: grid;
+        gap: 6px;
+        font-size: 0.9rem;
+      }
+
+      .players {
+        display: grid;
+        gap: 10px;
+        font-size: 0.95rem;
+      }
+
+      .player {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .player-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .status {
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(232, 240, 248, 0.7);
+      }
+
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .dot.goal {
+        background: var(--goal);
+      }
+
+      .dot.crash {
+        background: var(--crash);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <header>
+        <h1>Rocket Spectator</h1>
+        <div class="controls">
+          <button class="btn" id="startBtn" disabled>Start</button>
+          <button class="btn" id="resetBtn" disabled>Reset</button>
+          <input id="tokenInput" type="password" placeholder="token" />
+          <select id="mapSelect" disabled></select>
+          <button class="btn" id="mapBtn" disabled>Load Map</button>
+        </div>
+        <div class="meta" id="meta">Connecting...</div>
+      </header>
+      <div class="panel">
+        <canvas id="canvas" width="800" height="600"></canvas>
+      </div>
+      <div class="panel players">
+        <div class="status">Players</div>
+        <div id="players"></div>
+      </div>
+      <div class="panel legend" id="legend">
+        <span><span class="dot"></span> alive</span>
+        <span><span class="dot goal"></span> finished</span>
+        <span><span class="dot crash"></span> crashed</span>
+      </div>
+    </div>
+    <script type="module" src="/spectator.js"></script>
+  </body>
+</html>

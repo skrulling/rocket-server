@@ -1,0 +1,6 @@
+{
+  "name": "groq-gravity-1",
+  "url": "ws://localhost:4321/ws",
+  "runId": "default",
+  "entry": "./bot.ts"
+}

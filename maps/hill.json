@@ -1,0 +1,8 @@
+{
+  "gravity": { "x": 0, "y": 1.62 },
+  "maxThrust": 25,
+  "damping": 0.05,
+  "maxSpeed": 20,
+  "shipRadius": 0.3,
+  "goalRadius": 0.5
+}

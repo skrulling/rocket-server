@@ -1,0 +1,4 @@
+{
+  "name": "your-bot-name",
+  "entry": "./bot.ts"
+}

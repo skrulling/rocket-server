@@ -1,0 +1,28 @@
+{
+  "name": "rocket-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server/index.ts",
+    "server:local": "tsx src/server/index.ts --mode local",
+    "server:multi": "tsx src/server/index.ts --mode multi",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx scripts/smoke.ts",
+    "bot": "tsx src/client/rocket.ts",
+    "client": "tsx src/client/runClient.ts",
+    "clients": "tsx src/client/runAllClients.ts"
+  },
+  "dependencies": {
+    "ws": "^8.17.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.4"
+  }
+}
