@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { networkInterfaces } from "node:os";
+import { networkInterfaces, platform } from "node:os";
+import { execSync } from "node:child_process";
 import { startServer } from "./startServer.js";
 
 function getLocalIP(): string | null {
@@ -14,6 +15,41 @@ function getLocalIP(): string | null {
     }
   }
   return null;
+}
+
+// macOS firewall management
+const isMacOS = platform() === "darwin";
+let firewallConfigured = false;
+let nodePath: string | null = null;
+
+function configureFirewall(): boolean {
+  if (!isMacOS) return false;
+
+  try {
+    nodePath = execSync("which node", { encoding: "utf-8" }).trim();
+    console.log("Configuring macOS firewall (requires sudo)...");
+    execSync(`sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "${nodePath}"`, { stdio: "inherit" });
+    execSync(`sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp "${nodePath}"`, { stdio: "inherit" });
+    firewallConfigured = true;
+    console.log("Firewall configured to allow incoming connections.\n");
+    return true;
+  } catch (err) {
+    console.error("Failed to configure firewall:", err instanceof Error ? err.message : err);
+    console.error("You may need to manually allow connections in System Settings → Network → Firewall\n");
+    return false;
+  }
+}
+
+function revertFirewall(): void {
+  if (!isMacOS || !firewallConfigured || !nodePath) return;
+
+  try {
+    console.log("\nReverting firewall settings...");
+    execSync(`sudo /usr/libexec/ApplicationFirewall/socketfilterfw --blockapp "${nodePath}"`, { stdio: "inherit" });
+    console.log("Firewall settings reverted.");
+  } catch (err) {
+    console.error("Failed to revert firewall:", err instanceof Error ? err.message : err);
+  }
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,6 +89,11 @@ const mapPath = process.env.MAP_PATH ?? join(__dirname, "../../maps/smoke.txt");
 const mapsDir = process.env.MAPS_DIR ?? join(__dirname, "../../maps");
 const publicDir = process.env.PUBLIC_DIR ?? join(__dirname, "../../public");
 
+// Configure firewall for multi mode on macOS
+if (cli.mode === "multi" && isMacOS) {
+  configureFirewall();
+}
+
 startServer({
   port,
   runId,
@@ -64,7 +105,7 @@ startServer({
   mode: cli.mode,
   token: cli.token
 })
-  .then(({ port: actualPort }) => {
+  .then(({ port: actualPort, stop }) => {
     const localIP = getLocalIP();
     console.log(`\nServer running in ${cli.mode.toUpperCase()} mode`);
     console.log(`─────────────────────────────────────`);
@@ -77,8 +118,20 @@ startServer({
       console.log(`  npm run client -- --client YOUR-BOT --url ws://${localIP}:${actualPort}/ws --token ${cli.token}`);
     }
     console.log();
+
+    // Cleanup on exit
+    const cleanup = async () => {
+      console.log("\nShutting down server...");
+      await stop();
+      revertFirewall();
+      process.exit(0);
+    };
+
+    process.on("SIGINT", cleanup);
+    process.on("SIGTERM", cleanup);
   })
   .catch((err) => {
     console.error("Failed to start server", err);
+    revertFirewall();
     process.exit(1);
   });
