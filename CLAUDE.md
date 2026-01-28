@@ -90,9 +90,10 @@ Copy `clients/_template/` to start a new bot.
 ## Coordinates and Physics
 
 - World units = grid tiles. `(0,0)` is top-left, `+x` right, `+y` down
-- Default physics: gravity `{x:0, y:1.62}`, maxThrust `25`, damping `0.05`, maxSpeed `20`
+- Default physics: gravity `{x:0, y:1.62}`, maxThrust `25`, damping `0.05`, maxSpeed `20`, maxLandingSpeed `3`
 - Ship radius `0.35`, goal radius `0.5`
-- Win: ship center enters goal radius. Lose: collide with wall
+- Win: ship center enters goal radius at velocity <= maxLandingSpeed
+- Lose: collide with wall OR enter goal too fast (hard landing crash)
 
 ## Maps
 

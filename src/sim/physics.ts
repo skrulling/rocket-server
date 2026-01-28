@@ -6,6 +6,7 @@ export type PhysicsConfig = {
   maxThrust: number;
   damping: number;
   maxSpeed: number;
+  maxLandingSpeed: number;
 };
 
 export function integrate(

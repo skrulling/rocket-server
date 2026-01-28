@@ -9,9 +9,15 @@ Start at `S`, reach `G` as fast as possible, and avoid crashing into walls.
 How to win:
 
 - Each run starts with all players at the same start position.
-- You finish when your ship's center enters the goal radius.
-- You lose that attempt if you crash into a wall.
+- You finish when your ship's center enters the goal radius **at low speed**.
+- You lose that attempt if you crash into a wall or hit the goal too fast (hard landing).
 - Rankings are based on finish order (fastest first).
+
+### Landing
+
+Ships must slow down before reaching the goal. If your velocity magnitude exceeds `maxLandingSpeed` when entering the goal radius, you crash (hard landing) instead of finishing.
+
+Access the landing speed limit via `input.world.maxLandingSpeed` in your bot. Default is 3 units/s but varies per map.
 
 ## Folder Structure
 
@@ -66,7 +72,14 @@ export const controller: RocketController = {
 
 - `tick`, `dt`: simulation time
 - `map`: grid map with `lines`, `start`, `goal`
-- `world`: gravity and physics settings (can change per map)
+- `world`: physics settings (can change per map)
+  - `gravity`: `{ x, y }` gravity vector
+  - `maxThrust`: maximum thrust power
+  - `damping`: velocity damping factor
+  - `maxSpeed`: speed cap
+  - `maxLandingSpeed`: maximum velocity to land safely
+  - `shipRadius`: ship collision radius
+  - `goalRadius`: goal detection radius
 - `self`: your ship state
 - `ships`: all ships
 
@@ -77,5 +90,6 @@ World units match grid tiles. `(0,0)` is top-left. `+x` is right, `+y` is down.
 ## Tips
 
 - Normalize your direction vector
-- Scale throttle down as you approach the goal
+- Slow down before reaching the goal to avoid a hard landing crash
+- Check `input.world.maxLandingSpeed` to know when you're safe to land
 - Compensate for gravity with a small upward component

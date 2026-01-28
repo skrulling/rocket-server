@@ -25,6 +25,7 @@ export type WorldInfo = {
   maxThrust: number;
   damping: number;
   maxSpeed: number;
+  maxLandingSpeed: number;
   shipRadius: number;
   goalRadius: number;
 };

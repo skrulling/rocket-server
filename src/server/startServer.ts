@@ -34,6 +34,7 @@ export async function startServer(options: ServerOptions): Promise<{
     maxThrust: 25,
     damping: 0.05,
     maxSpeed: 20,
+    maxLandingSpeed: 3,
     shipRadius: 0.3,
     goalRadius: 0.5
   };
@@ -48,6 +49,7 @@ export async function startServer(options: ServerOptions): Promise<{
         maxThrust: parsed.maxThrust ?? defaultWorld.maxThrust,
         damping: parsed.damping ?? defaultWorld.damping,
         maxSpeed: parsed.maxSpeed ?? defaultWorld.maxSpeed,
+        maxLandingSpeed: parsed.maxLandingSpeed ?? defaultWorld.maxLandingSpeed,
         shipRadius: parsed.shipRadius ?? defaultWorld.shipRadius,
         goalRadius: parsed.goalRadius ?? defaultWorld.goalRadius
       };

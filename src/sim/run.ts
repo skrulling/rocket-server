@@ -97,10 +97,18 @@ export class Run {
       }
 
       if (vec.distance(ship.pos, this.map.goal) <= this.config.goalRadius) {
-        ship.status = "finished";
-        ship.finishTick = this.tick;
-        ship.vel = { x: 0, y: 0 };
-        events.push({ type: "playerFinished", shipId: ship.id, tick: this.tick });
+        const speed = Math.hypot(ship.vel.x, ship.vel.y);
+        if (speed <= this.config.maxLandingSpeed) {
+          ship.status = "finished";
+          ship.finishTick = this.tick;
+          ship.vel = { x: 0, y: 0 };
+          events.push({ type: "playerFinished", shipId: ship.id, tick: this.tick });
+        } else {
+          ship.status = "crashed";
+          ship.crashTick = this.tick;
+          ship.vel = { x: 0, y: 0 };
+          events.push({ type: "playerCrashed", shipId: ship.id, tick: this.tick });
+        }
       }
     }
 
